@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro; 
+using UnityEngine.SceneManagement;
 
 [System.Serializable] 
 public class Wave
@@ -15,6 +16,8 @@ public class WaveManager : MonoBehaviour
     public Wave[] waves; 
     public Transform[] spawnNodes; 
     public float timeBetweenWaves = 5f;
+    public string nextSceneName;
+    public int startingWaveNumber = 1;
 
 
     public TextMeshProUGUI gameUIText;
@@ -31,7 +34,7 @@ public class WaveManager : MonoBehaviour
     {
         for (int i = 0; i < waves.Length; i++)
         {
-            currentWaveIndex = i + 1;
+            currentWaveIndex = startingWaveNumber + i;
             Wave currentWave = waves[i];
             
             enemiesAlive = currentWave.enemyCount;
@@ -47,8 +50,18 @@ public class WaveManager : MonoBehaviour
             {
                 yield return null; 
             }
-
-            yield return new WaitForSeconds(timeBetweenWaves);
+            Debug.Log("wave finished. i = " + i + " waves.Length = " + waves.Length);
+            if (!string.IsNullOrEmpty(nextSceneName))
+            {
+                Debug.Log("Last wave cleared. Loading scene: " + nextSceneName);
+                SceneManager.LoadScene(nextSceneName);
+                yield break;
+            }
+            else
+            {
+                yield return new WaitForSeconds(timeBetweenWaves);
+            }
+            
         }
 
 
@@ -64,6 +77,7 @@ public class WaveManager : MonoBehaviour
     public void EnemyDefeated()
     {
         enemiesAlive--;
+        Debug.Log("enemy defeated. enemies alive: " + enemiesAlive);
         UpdateUI();
     }
 
