@@ -17,6 +17,13 @@ public class PlayerController : MonoBehaviour
     public float projectileSpeed = 20f;
     public int projectileDamage = 1;
 
+
+    [Header("Audio Settings")]
+    public AudioSource engineAudioSource;
+    public AudioSource cannonAudioSource;
+    public AudioClip fireSound;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -27,10 +34,28 @@ public class PlayerController : MonoBehaviour
         Vector2 movementVector = movementValue.Get<Vector2>();
         movementX = movementVector.x;
         movementY = movementVector.y;
+
+
+        if (Mathf.Abs(movementX) > 0.1f || Mathf.Abs(movementY) > 0.1f)
+        {
+            if (!engineAudioSource.isPlaying)
+            {
+                engineAudioSource.Play();
+            }
+        }
+        else 
+        {
+            engineAudioSource.Stop();
+        }
+
     }
 
     void OnJump()
     {
+
+        cannonAudioSource.PlayOneShot(fireSound);
+   
+
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
         Bullet bullet = projectile.GetComponent<Bullet>();
