@@ -18,9 +18,32 @@ public class Bullet : MonoBehaviour
         if (other.CompareTag("Untagged"))
             return;
 
+        // Hit enemy
         BasicEnemyController enemy = other.GetComponent<BasicEnemyController>();
         if (enemy != null)
+        {
             enemy.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Hit boss
+        BossEnemyController boss = other.GetComponent<BossEnemyController>();
+        if (boss != null)
+        {
+            boss.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Hit player
+        PlayerHealth player = other.GetComponent<PlayerHealth>();
+        if (player != null)
+        {
+            player.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
 
         Destroy(gameObject);
     }
