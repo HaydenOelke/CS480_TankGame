@@ -88,12 +88,17 @@ public class BasicEnemyController : MonoBehaviour
     }
 
     void MoveTowardPlayer()
-    {
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * moveSpeed * Time.deltaTime;
-        // Keep the enemy looking at the player, but lock the Y axis so they don't tilt up/down
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-    }
+{
+    Vector3 direction = (player.position - transform.position).normalized;
+    transform.position += direction * moveSpeed * Time.deltaTime;
+    transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+
+    // Snap to terrain height
+    float terrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
+    Vector3 pos = transform.position;
+    pos.y = terrainHeight;
+    transform.position = pos;
+}
 
     void TryAttack()
     {
@@ -149,4 +154,5 @@ public class BasicEnemyController : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
+    
 }

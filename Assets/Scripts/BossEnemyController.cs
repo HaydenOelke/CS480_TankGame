@@ -61,10 +61,10 @@ public class BossEnemyController : MonoBehaviour
     dir.y = 0;
     
     // Smooth rotation
-    Quaternion targetRotation = Quaternion.LookRotation(dir);
+    Quaternion targetRotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0);
     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
     
-    transform.position += transform.forward * moveSpeed * Time.deltaTime;
+    transform.position += dir * moveSpeed * Time.deltaTime;
 }
 
     void TryAttack()
