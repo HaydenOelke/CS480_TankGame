@@ -26,7 +26,6 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damageAmount)
 {
-    Debug.Log("TakeDamage called: " + damageAmount + " | " + System.Environment.StackTrace);
     currentHealth -= damageAmount;
     currentHealth = Mathf.Max(0, currentHealth);
     UpdateUI();

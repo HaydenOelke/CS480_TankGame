@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using TMPro; 
-using UnityEngine.SceneManagement;
 
 [System.Serializable] 
 public class Wave
@@ -54,7 +53,7 @@ public class WaveManager : MonoBehaviour
             if (!string.IsNullOrEmpty(nextSceneName))
             {
                 Debug.Log("Last wave cleared. Loading scene: " + nextSceneName);
-                SceneManager.LoadScene(nextSceneName);
+                SceneLoader.LoadScene(nextSceneName);
                 yield break;
             }
             else
