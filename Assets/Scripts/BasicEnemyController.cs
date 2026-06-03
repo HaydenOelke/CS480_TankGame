@@ -101,24 +101,19 @@ public class BasicEnemyController : MonoBehaviour
 }
 
     void TryAttack()
+{
+    if (attackTimer <= 0f)
     {
-        if (attackTimer <= 0f)
-        {
-            Debug.Log("Enemy attacks! Distance: " + Vector3.Distance(transform.position, player.position));
-
-            // Play the hit sound directly from the audio source
-            if (audioSource != null && attackSound != null)
-            {
-                audioSource.PlayOneShot(attackSound);
-            }
-
-            // Deal damage to the player
-            player.GetComponent<PlayerHealth>()?.TakeDamage(attackDamage);
-            
-            // Reset the cooldown
-            attackTimer = attackCooldown;
-        }
+        PlayerHealth ph = player.GetComponent<PlayerHealth>();
+        if (ph == null) ph = player.GetComponentInParent<PlayerHealth>();
+        if (ph == null) ph = player.GetComponentInChildren<PlayerHealth>();
+        if (ph != null)
+            ph.TakeDamage(attackDamage);
+        else
+            Debug.LogWarning("PlayerHealth not found!");
+        attackTimer = attackCooldown;
     }
+}
 
     public void TakeDamage(int damageAmount)
     {
