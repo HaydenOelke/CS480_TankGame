@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "CS480_TankGame.slnx"
+    "dotnet.defaultSolution": "CS480-TankGame-8c8c9dc639f93ac6480acc7f43fa965714c57e58.slnx"
 }
