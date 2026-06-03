@@ -1,9 +1,14 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BossEnemyController : MonoBehaviour
 {
     public int maxHealth = 20;
     private int currentHealth;
+
+    [Header("Health Bar")]
+    public Image bossHealthFill;
+    public float fullBarWidth = 400f;
 
     [Header("Detection")]
     public float detectionRange = 100f;
@@ -20,6 +25,16 @@ public class BossEnemyController : MonoBehaviour
     public Transform firePoint;
     public float bulletSpeed = 15f;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip shootSound;
+    // --- NEW AUDIO VARIABLE ---
+    public AudioClip deathSound; 
+    // --------------------------
+
+    [Header("Win")]
+    public GameObject winPanel;
+
     private Transform player;
     private enum State { Idle, Chase, Attack }
     private State currentState = State.Idle;
@@ -29,13 +44,18 @@ public class BossEnemyController : MonoBehaviour
         currentHealth = maxHealth;
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
+        {
             player = playerObj.transform;
+            Debug.Log("Boss found: " + playerObj.name);
+        }
+        else
+            Debug.LogWarning("Boss: No Player found!");
+        UpdateHealthBar();
     }
 
     void Update()
     {
         if (player == null) return;
-
         float dist = Vector3.Distance(transform.position, player.position);
         attackTimer -= Time.deltaTime;
 
@@ -56,16 +76,13 @@ public class BossEnemyController : MonoBehaviour
     }
 
     void MoveTowardPlayer()
-{
-    Vector3 dir = (player.position - transform.position).normalized;
-    dir.y = 0;
-    
-    // Smooth rotation
-    Quaternion targetRotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0);
-    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
-    
-    transform.position += dir * moveSpeed * Time.deltaTime;
-}
+    {
+        Vector3 dir = (player.position - transform.position).normalized;
+        dir.y = 0;
+        Quaternion targetRotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+        transform.position += dir * moveSpeed * Time.deltaTime;
+    }
 
     void TryAttack()
     {
@@ -77,39 +94,78 @@ public class BossEnemyController : MonoBehaviour
     }
 
     void ShootAtPlayer()
-{
-    if (bulletPrefab == null || firePoint == null) return;
-
-    Vector3 dir = (player.position - firePoint.position).normalized;
-    dir.y = 0;
-
-    GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(dir));
-
-    Bullet b = bullet.GetComponent<Bullet>();
-    if (b != null)
     {
-        b.ownerTag = "Enemy";
-        b.damage = attackDamage;
+        if (bulletPrefab == null || firePoint == null) return;
+
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
+        Vector3 dir = (player.position - firePoint.position).normalized;
+        dir.y = 0;
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(dir));
+        Bullet b = bullet.GetComponent<Bullet>();
+        if (b != null)
+        {
+            b.ownerTag = "Enemy";
+            b.damage = attackDamage;
+        }
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        if (rb != null)
+            rb.linearVelocity = dir * bulletSpeed;
+        Destroy(bullet, 5f);
     }
-
-    Rigidbody rb = bullet.GetComponent<Rigidbody>();
-    if (rb != null)
-        rb.linearVelocity = dir * bulletSpeed;
-
-    Destroy(bullet, 5f);
-}
 
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
+        currentHealth = Mathf.Max(0, currentHealth);
+        UpdateHealthBar();
         if (currentHealth <= 0)
             Die();
     }
 
+    void UpdateHealthBar()
+    {
+        if (bossHealthFill != null)
+        {
+            float ratio = (float)currentHealth / maxHealth;
+            RectTransform rt = bossHealthFill.GetComponent<RectTransform>();
+            Vector2 size = rt.sizeDelta;
+            size.x = fullBarWidth * ratio;
+            rt.sizeDelta = size;
+        }
+    }
+
     void Die()
     {
-        Debug.Log("Boss defeated!");
+
+        if (deathSound != null)
+        {
+
+            GameObject audioObj = new GameObject("BossDeathSpeaker");
+            audioObj.transform.position = transform.position;
+            
+
+            AudioSource tempSource = audioObj.AddComponent<AudioSource>();
+            tempSource.clip = deathSound;
+            tempSource.spatialBlend = 1f; 
+            
+
+            tempSource.ignoreListenerPause = true; 
+            
+
+            tempSource.Play();
+            Destroy(audioObj, deathSound.length);
+        }
+        // -----------------------------
+
+        if (winPanel != null)
+        {
+            winPanel.SetActive(true);
+            Time.timeScale = 0f;
+        }
         Destroy(gameObject);
     }
 }
-

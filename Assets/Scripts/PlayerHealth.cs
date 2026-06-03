@@ -4,7 +4,7 @@ using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 10;
+    public int maxHealth = 100;
     public int currentHealth;
     
     [Header("UI")]
@@ -17,22 +17,30 @@ public class PlayerHealth : MonoBehaviour
 
     void Start()
     {
-        currentHealth = maxHealth;
+        Debug.Log("GameData.playerHealth on scene load: " + GameData.playerHealth);
+        currentHealth = GameData.playerHealth;
+        if (healthBarFill != null)
+        {
+            RectTransform rt = healthBarFill.GetComponent<RectTransform>();
+            Vector2 size = rt.sizeDelta;
+            size.x = fullBarWidth;
+            rt.sizeDelta = size;
+        }
         UpdateUI();
-        
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
     }
 
     public void TakeDamage(int damageAmount)
-{
-    currentHealth -= damageAmount;
-    currentHealth = Mathf.Max(0, currentHealth);
-    UpdateUI();
-    
-    if (currentHealth <= 0)
-        Die();
-}
+    {
+        currentHealth -= damageAmount;
+        currentHealth = Mathf.Max(0, currentHealth);
+        GameData.playerHealth = currentHealth;
+        UpdateUI();
+        
+        if (currentHealth <= 0)
+            Die();
+    }
 
     void UpdateUI()
     {
@@ -43,13 +51,11 @@ public class PlayerHealth : MonoBehaviour
         {
             float ratio = (float)currentHealth / maxHealth;
             
-            // Shrink width — left edge stays, right edge pulls in
             RectTransform rt = healthBarFill.GetComponent<RectTransform>();
             Vector2 size = rt.sizeDelta;
             size.x = fullBarWidth * ratio;
             rt.sizeDelta = size;
             
-            // Color shift: green → yellow → red
             if (ratio > 0.5f)
                 healthBarFill.color = Color.Lerp(Color.yellow, Color.green, (ratio - 0.5f) * 2f);
             else
@@ -59,9 +65,9 @@ public class PlayerHealth : MonoBehaviour
 
     void Die()
     {
+        GameData.playerHealth = 100;
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
-        
         Time.timeScale = 0f;
     }
 }
