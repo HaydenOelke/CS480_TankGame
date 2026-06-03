@@ -25,6 +25,13 @@ public class BossEnemyController : MonoBehaviour
     public Transform firePoint;
     public float bulletSpeed = 15f;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip shootSound;
+    // --- NEW AUDIO VARIABLE ---
+    public AudioClip deathSound; 
+    // --------------------------
+
     [Header("Win")]
     public GameObject winPanel;
 
@@ -89,6 +96,12 @@ public class BossEnemyController : MonoBehaviour
     void ShootAtPlayer()
     {
         if (bulletPrefab == null || firePoint == null) return;
+
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
         Vector3 dir = (player.position - firePoint.position).normalized;
         dir.y = 0;
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(dir));
@@ -127,6 +140,27 @@ public class BossEnemyController : MonoBehaviour
 
     void Die()
     {
+
+        if (deathSound != null)
+        {
+
+            GameObject audioObj = new GameObject("BossDeathSpeaker");
+            audioObj.transform.position = transform.position;
+            
+
+            AudioSource tempSource = audioObj.AddComponent<AudioSource>();
+            tempSource.clip = deathSound;
+            tempSource.spatialBlend = 1f; 
+            
+
+            tempSource.ignoreListenerPause = true; 
+            
+
+            tempSource.Play();
+            Destroy(audioObj, deathSound.length);
+        }
+        // -----------------------------
+
         if (winPanel != null)
         {
             winPanel.SetActive(true);
