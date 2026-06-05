@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     private float movementX;
     private float movementY;
     private int baseProjectileDamage;
+    private float baseSpeed;
+    private float baseTurnSpeed;
 
     public float speed = 10f;
     public float turnSpeed = 120f;
@@ -28,8 +30,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        baseSpeed = speed;
+        baseTurnSpeed = turnSpeed;
         baseProjectileDamage = projectileDamage;
-        projectileDamage = Mathf.Max(baseProjectileDamage, GameData.playerDamage);
+        ApplyRunUpgrades();
     }
 
     void OnMove(InputValue movementValue)
@@ -127,5 +131,23 @@ public class PlayerController : MonoBehaviour
 
         projectileDamage += amount;
         GameData.AddDamage(amount);
+    }
+
+    public void IncreaseSpeed(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        GameData.AddSpeedMultiplier(amount);
+        ApplyRunUpgrades();
+    }
+
+    private void ApplyRunUpgrades()
+    {
+        projectileDamage = Mathf.Max(baseProjectileDamage, GameData.playerDamage);
+
+        float speedMultiplier = Mathf.Max(1f, GameData.playerSpeedMultiplier);
+        speed = baseSpeed * speedMultiplier;
+        turnSpeed = baseTurnSpeed * speedMultiplier;
     }
 }
