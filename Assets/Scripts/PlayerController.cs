@@ -91,9 +91,19 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("PickUp"))
+        if (!other.gameObject.CompareTag("PickUp"))
+            return;
+
+        HealthPickup pickup = other.GetComponent<HealthPickup>();
+        if (pickup == null)
+            pickup = other.GetComponentInParent<HealthPickup>();
+
+        if (pickup != null)
         {
-            other.gameObject.SetActive(false);
+            pickup.Collect(GetComponent<PlayerHealth>());
+            return;
         }
+
+        other.gameObject.SetActive(false);
     }
 }
