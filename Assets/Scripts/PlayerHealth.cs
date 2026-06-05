@@ -75,7 +75,7 @@ public class PlayerHealth : MonoBehaviour
 
     void Die()
     {
-        GameData.playerHealth = 100;
+        GameData.ResetRun();
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
         Time.timeScale = 0f;

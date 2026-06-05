@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private float movementX;
     private float movementY;
+    private int baseProjectileDamage;
 
     public float speed = 10f;
     public float turnSpeed = 120f;
@@ -27,6 +28,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        baseProjectileDamage = projectileDamage;
+        projectileDamage = Mathf.Max(baseProjectileDamage, GameData.playerDamage);
     }
 
     void OnMove(InputValue movementValue)
@@ -94,6 +97,16 @@ public class PlayerController : MonoBehaviour
         if (!other.gameObject.CompareTag("PickUp"))
             return;
 
+        DamagePickup damagePickup = other.GetComponent<DamagePickup>();
+        if (damagePickup == null)
+            damagePickup = other.GetComponentInParent<DamagePickup>();
+
+        if (damagePickup != null)
+        {
+            damagePickup.Collect(this);
+            return;
+        }
+
         HealthPickup pickup = other.GetComponent<HealthPickup>();
         if (pickup == null)
             pickup = other.GetComponentInParent<HealthPickup>();
@@ -105,5 +118,14 @@ public class PlayerController : MonoBehaviour
         }
 
         other.gameObject.SetActive(false);
+    }
+
+    public void IncreaseDamage(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        projectileDamage += amount;
+        GameData.AddDamage(amount);
     }
 }
